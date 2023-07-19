@@ -1,4 +1,5 @@
 import datetime
+from dateutil.relativedelta import relativedelta
 import pandas as pd
 from os import path
 
@@ -100,29 +101,22 @@ def sum_management(data: dict):
 def get_begin_end(date: datetime.datetime, month: int, mode: int):
     date = datetime.datetime(
         datetime.datetime.today().year, date.month, date.day)
+
     if mode == 1:
         begin_date = datetime.datetime(date.year, month, date.day)
-        end_date = datetime.datetime(date.year, month, date.day - 1)
-        if month + 3 > 12:
-            end_date = datetime.datetime(date.year + 1, month + 3 - 12, end_date.day)
-        else:
-            end_date = datetime.datetime(date.year, month + 3, date.day - 1)
+        end_date = begin_date+relativedelta(months=+3, days=-1)
         string = datetime.datetime.strftime(
             begin_date, "%Y-%m-%d") + "至" + datetime.datetime.strftime(end_date, "%Y-%m-%d")
         return string
     if mode == 2:
         begin_date = datetime.datetime(date.year, month, date.day)
-        end_date = datetime.datetime(date.year, month, date.day - 1)
-        if month + 6 > 12:
-            end_date = datetime.datetime(date.year + 1, month + 6 - 12, end_date.day)
-        else:
-            end_date = datetime.datetime(date.year, month + 6, date.day - 1)
+        end_date = begin_date+relativedelta(months=+6, days=-1)
         string = datetime.datetime.strftime(
             begin_date, "%Y-%m-%d") + "至" + datetime.datetime.strftime(end_date, "%Y-%m-%d")
         return string
     if mode == 3:
         begin_date = datetime.datetime(date.year, month, date.day)
-        end_date = datetime.datetime(date.year + 1, month, date.day - 1)
+        end_date = begin_date+relativedelta(months=+12, days=-1)
         string = datetime.datetime.strftime(
             begin_date, "%Y-%m-%d") + "至" + datetime.datetime.strftime(end_date, "%Y-%m-%d")
         return string
