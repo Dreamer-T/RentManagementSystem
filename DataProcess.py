@@ -2,6 +2,7 @@ import datetime
 from dateutil.relativedelta import relativedelta
 import pandas as pd
 from os import path
+from tkintertable import TableModel
 
 
 def excel_to_dict(excel_file):
@@ -122,3 +123,6 @@ def get_begin_end(date: datetime.datetime, month: int, mode: int):
         return string
     else:
         return ""
+
+def get_longest_string(data:TableModel):
+    pass

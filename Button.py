@@ -5,11 +5,46 @@ from tkinter import filedialog
 from tkintertable import TableModel, TableCanvas
 from DataProcess import *
 from functools import partial
+from openpyxl import load_workbook
+from openpyxl.styles import Alignment
+
+
+def neat_file(path: str):
+    wb = load_workbook(path)
+    ws = wb.active
+    print(ws.columns)
+    # 自动调整列宽
+    for column_cells in ws.columns:
+        print(column_cells)
+        max_length = 0
+        for cell in column_cells:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(cell.value)
+            except:
+                pass
+        adjusted_width = max_length * 2 + 2
+        ws.column_dimensions[column_cells[0].column_letter].width = adjusted_width
+    for row in ws.iter_rows():
+        for cell in row:
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+
+    wb.save(path)
 
 
 def initial_button(excel_dict):
     global dict_variable
     dict_variable = excel_dict
+
+
+def format_table(tablecanvas: TableCanvas, table_dict: dict):
+    max_len_name = 5
+    max_len_room = 5
+    for line in table_dict:
+        max_len_name = max(len(table_dict[line]['公司名称']), max_len_name)
+        max_len_room = max(len(table_dict[line]['房号']), max_len_room)
+    tablecanvas.model.columnwidths['公司名称'] = max_len_name*20
+    tablecanvas.model.columnwidths['房号'] = max_len_room*20
 
 
 def choose_excel(tablecanvas: TableCanvas,  default_excel_filepath="合同表格 copy.xlsx"):
@@ -29,6 +64,7 @@ def choose_excel(tablecanvas: TableCanvas,  default_excel_filepath="合同表格
     excel_model = TableModel()
     excel_model.importDict(excel_dict)
     tablecanvas.updateModel(excel_model)
+    format_table(tablecanvas, excel_dict)
     tablecanvas.redrawTable()
 
 
@@ -79,8 +115,10 @@ def query(month_combo: ttk.Combobox, pay_way_combo: ttk.Combobox):
         return
     result_model = TableModel()
     result_model.importDict(result_dict)
-    result_table = TableCanvas(result_frame, model=result_model)
-    result_table.show()
+    result_tablecanvas = TableCanvas(result_frame, model=result_model)
+
+    format_table(result_tablecanvas, result_dict)
+    result_tablecanvas.show()
     rent_info = tk.Label(query_window, text="房租总额")
     rent_info.pack()
     rent_label = tk.Label(query_window, text=sum_rent(result_dict))
@@ -106,6 +144,7 @@ def modify():
     result_model = TableModel()
     result_model.importDict(dict_variable)
     result_table = TableCanvas(modify_frame, model=result_model)
+    format_table(result_table, dict_variable)
     result_table.show()
     add_row = tk.Button(modify_window, text="新增行",
                         command=partial(add_new_row, result_table))
@@ -171,6 +210,8 @@ def save_result(model: TableModel, month_combox: ttk.Combobox, pay_way_combox: t
             excel_df.to_excel(file_path, index=False)
         except:
             tkinter.messagebox.showerror("错误", "文件已被打开，未被保存，请重新查询")
+
+        neat_file(file_path)
 
 
 def save(model: TableModel):
